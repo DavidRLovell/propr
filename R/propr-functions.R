@@ -192,7 +192,7 @@ phiDF <- function(X){
   X.clr          <- clr(X)
   X.sma          <- sma(X.clr)
   X.vlr          <- vlr(X)
-  X.clr.var      <- apply(X.clr, 2, var) # The variance of each column
+  X.clr.var      <- apply(X.clr, 2, var)  # The variance of each column
   X.phi          <- sweep(X.vlr, 2, X.clr.var, FUN="/")
   X.phisym       <- phisym(X.clr)
   lt             <- which(col(X.sma$b)<row(X.sma$b),arr.ind=FALSE)
@@ -209,3 +209,4 @@ phiDF <- function(X){
   result$phisym  <- X.phisym[lt]
   return(result)
 }
+

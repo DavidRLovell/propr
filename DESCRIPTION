@@ -11,5 +11,5 @@ Description: This package implements and extends the phi statistic as measure of
     10.1371/journal.pcbi.1004075 for use with compositional data, i.e., data that carry only
     relative information (e.g., proportions, percentages, parts-per-million, etc).
 License: MIT
-URL: http://github.com/DavidRLovell/propr
-BugReports: http://github.com/DavidRLovell/propr/issues
+URL: https://github.com/DavidRLovell/propr
+BugReports: https://github.com/DavidRLovell/propr/issues
