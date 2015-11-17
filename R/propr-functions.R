@@ -1,8 +1,8 @@
 #' @title Closure
-#' 
-#' @description 
+#'
+#' @description
 #' \code{clo} divides each row of \code{X} by its row sum
-#' 
+#'
 #' @details If \code{check} is \code{TRUE} then this function will stop if
 #' there are any negative or \code{NA} values in \code{X}
 #' @param X A matrix or dataframe of positive numeric values
@@ -12,8 +12,8 @@
 #' X <- matrix(1:12, nrow=3)
 #' x <- clo(X)
 #' rowSums(x)
-#' @export 
-clo <- function(X, check=FALSE){
+#' @export
+propr.clo <- function(X, check=FALSE){
   if(check){
     if(any(X < 0))    stop("negative values found")
     if(any(is.na(X))) stop("NA values found")
@@ -23,10 +23,10 @@ clo <- function(X, check=FALSE){
 
 #######################################################################################
 #' @title Centred logratio transformation
-#' 
-#' @description 
+#'
+#' @description
 #' \code{clr} takes the log of each row of X and centres it (i.e., subtracts the mean).
-#' 
+#'
 #' @details If \code{check} is \code{TRUE} then this function will stop if
 #' there are any negative or \code{NA} values in \code{X}
 #' @param X A matrix or dataframe of positive numeric values
@@ -38,8 +38,8 @@ clo <- function(X, check=FALSE){
 #' x <- clr(X)
 #' rowSums(x)             # Pretty close to zero
 #' apply(exp(x), 1, prod) # The row products of exp(x) will be 1
-#' @export 
-clr <- function(X, check=FALSE){
+#' @export
+propr.clr <- function(X, check=FALSE){
   if(check){
     if(any(X < 0))    stop("negative values found")
     if(any(is.na(X))) stop("NA values found")
@@ -49,12 +49,12 @@ clr <- function(X, check=FALSE){
 }
 
 #######################################################################################
-#' @title Variance of logratios 
-#' 
-#' @description 
+#' @title Variance of logratios
+#'
+#' @description
 #' \code{vlr} returns a matrix where element (i,j) is
 #' the variance (over rows) of the log of the ratios of column i and j.
-#' 
+#'
 #' @details If \code{check} is \code{TRUE} then this function will stop if
 #' there are any negative or \code{NA} values in \code{X}.
 #' @param X A matrix or dataframe of positive numeric values
@@ -69,8 +69,8 @@ clr <- function(X, check=FALSE){
 #' X <- data.frame(a=(1:N), b=(1:N) * rnorm(N, 10, 0.1),
 #'                 c=(N:1), d=(N:1) * rnorm(N, 10, 1.0))
 #' round(vlr(X),2)
-#' @export 
-vlr <- function(X, check=FALSE){
+#' @export
+propr.vlr <- function(X, check=FALSE){
   if(check){
     if(any(X < 0))    stop("negative values found")
     if(any(is.na(X))) stop("NA values found")
@@ -84,9 +84,9 @@ vlr <- function(X, check=FALSE){
 
 
 #######################################################################################
-#' @title Symmetric phi statistic 
-#' 
-#' @description 
+#' @title Symmetric phi statistic
+#'
+#' @description
 #' \code{phisym} returns a matrix where element (i,j) is
 #' the symmetric phi statistic between columns i and j of \code{X}.
 #' @details \code{X} should be the result of a centred logratio transformation
@@ -99,18 +99,18 @@ vlr <- function(X, check=FALSE){
 #' X <- data.frame(a=(1:N), b=(1:N) * rnorm(N, 10, 0.1),
 #'                 c=(N:1), d=(N:1) * rnorm(N, 10, 1.0))
 #' round(phisym(clr(X)),2)
-#' @export 
-phisym <- function (X) 
+#' @export
+propr.phisym <- function (X)
 {
-  Cov    <- stats::var(X)  
+  Cov    <- stats::var(X)
   tmp    <- 2 * Cov / outer(diag(Cov), diag(Cov), "+")
   return((1-tmp)/(1+tmp))
 }
 
 #######################################################################################
-#' @title Standardised Major Axis fits of pairs of columns 
-#' 
-#' @description 
+#' @title Standardised Major Axis fits of pairs of columns
+#'
+#' @description
 #' \code{sma} returns a list whose elements are matrices whose elements (i,j)
 #' relate to the Standardised Major Axis fits of columns i and j of \code{X}
 #' @details \strong{Note:} \code{X} should be the result of a centred logratio transformation
@@ -128,24 +128,24 @@ phisym <- function (X)
 #' pairs(X)
 #' pairs(clr(X)) # Note the spurious correlation between variables c and d
 #' sma(clr(X))
-#' @export 
-sma <- function(X){
+#' @export
+propr.sma <- function(X){
   X.cor <- stats::cor(X, use="pairwise.complete.obs")
   X.var <- stats::cov(X, use="pairwise.complete.obs")
   X.sd  <- sqrt(diag(X.var))
-  
+
   # Following the approach of Warton et al. Biol. Rev. (2006), 81, pp. 259-291
   # r.rf2 = cor(X+Y, X-Y)^2
   #       = (var(X) - var(Y))^2  /  ((var(X) + var(Y))^2 - 4cov(X,Y)^2)
   r.rf2   <-
     (outer(diag(X.var), diag(X.var), "-")^2 ) /
     (outer(diag(X.var), diag(X.var), "+")^2 - 4 * X.var^2 )
-  
+
   # At this point the diagonal of r.rf2 will be 0/0 = NaN. The correlation should be 0
   diag(r.rf2) <- 0
   res.dof     <- nrow(X) - 2
   F           <- r.rf2/(1 - r.rf2) * res.dof
-  
+
   list(b=sign(X.cor) * outer(X.sd, X.sd, "/"), # slope = sign(s_xy) s_y/s_x
        p=1 - pf(F, 1, res.dof),                # p-value of the test that b = 1
        r2=X.cor^2)                             # the squared correlation coefficient
@@ -154,9 +154,9 @@ sma <- function(X){
 
 
 #######################################################################################
-#' @title Pairwise proportionality, slope and other statistics of columns  
-#' 
-#' @description 
+#' @title Pairwise proportionality, slope and other statistics of columns
+#'
+#' @description
 #' \code{phiDF} returns a dataframe of various statistics for each pair of columns in
 #' \code{X}.
 #' @details \strong{Note:} \code{X} should be the result of a centred logratio transformation
@@ -187,8 +187,8 @@ sma <- function(X){
 #'     (1 + b^2 - 2*b*sqrt(r2))
 #'   )
 #' )
-#' @export 
-phiDF <- function(X){
+#' @export
+propr.phiDF <- function(X){
   X.clr          <- clr(X)
   X.sma          <- sma(X.clr)
   X.vlr          <- vlr(X)
