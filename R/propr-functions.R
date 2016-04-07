@@ -127,7 +127,7 @@ propr.phisym <- function (X)
 #' propr.phisym function. The number of Dirichlet Monte-Carlo replicates is
 #' obtained from the aldex.clr object
 
-aldex.phi <- function(aldex.clr){
+propr.aldex.phi <- function(aldex.clr){
 
 	# calculate expected value of phi
 	# a single high phi value will push the component out of consideration
