@@ -111,8 +111,9 @@ propr.phisym <- function (X)
 #' @title Expected value of phi from Dirichlet log-ratio distributions
 #'
 #' @description
-#' returns dataframe of the lower-triangle of symmetrical phi metric
-#' where the value of phi is the expected value of a number of Dirichlet
+#' default returns dataframe of the lower-triangle of symmetrical phi metric,
+#' alternatively returns matrix of the summetrical phi metric
+#' in either case, the value of phi is the expected value of a number of Dirichlet
 #' Monte-Carlo replicates of the data. This reduces the problem of
 #' 0-count and low-count features being highly variable because their
 #' values range wildly and so the expected value is always large
@@ -122,12 +123,14 @@ propr.phisym <- function (X)
 #' the sma.df function in particular is very time and memory intensive
 #' @examples
 #' # use a count table where the samples are by column, features by row
-#' x <- aldex.clr(count.table)
-#' # returns a dataframe of the expected value of the lower triangle of the
-#' propr.phisym function. The number of Dirichlet Monte-Carlo replicates is
+#' x <- aldex.clr(count.table, return="df")
+#' # if return = df, returns a dataframe of the expected value of the lower
+#' triangle of the propr.phisym function.
+#' # if return = mat, returns the symmetric matrix
+#' The number of Dirichlet Monte-Carlo replicates is
 #' obtained from the aldex.clr object
 
-propr.aldex.phi <- function(aldex.clr){
+propr.aldex.phi <- function(aldex.clr, return="df"){
 
 	# calculate expected value of phi
 	# a single high phi value will push the component out of consideration
@@ -159,7 +162,8 @@ propr.aldex.phi <- function(aldex.clr){
 	#save the lower triangle as an expected value
 	sma.df$phi <- sym.phi[lt] /  numMCInstances(aldex.clr)
 
-	return(sma.df)
+	if(return=="df") return(sma.df)
+	if(return=="mat") return(sym.phi /  numMCInstances(aldex.clr))
 }
 
 #######################################################################################
@@ -245,12 +249,12 @@ propr.sma <- function(X){
 #' )
 #' @export
 propr.phiDF <- function(X){
-  X.clr          <- clr(X)
-  X.sma          <- sma(X.clr)
-  X.vlr          <- vlr(X)
+  X.clr          <- propr.clr(X)
+  X.sma          <- propr.sma(X.clr)
+  X.vlr          <- propr.vlr(X)
   X.clr.var      <- apply(X.clr, 2, var)  # The variance of each column
   X.phi          <- sweep(X.vlr, 2, X.clr.var, FUN="/")
-  X.phisym       <- phisym(X.clr)
+  X.phisym       <- propr.phisym(X.clr)
   lt             <- which(col(X.sma$b)<row(X.sma$b),arr.ind=FALSE)
   lt.ind         <- which(col(X.sma$b)<row(X.sma$b),arr.ind=TRUE)
   result         <- data.frame(
